@@ -15,36 +15,39 @@ var userInput = process.argv; // all our inputs
 var inputSelection = process.argv[2];
 var request = require("request");
 
+
+function getUserInput(userInput) {
+
+    var searchName = '';
+    for (var i = 3; i < userInput.length; i++) {
+
+        searchName = searchName + "+" + userInput[i];
+
+    }
+    return searchName.slice(1);
+};
+
+
 if (inputSelection === "movie-this") { // imdb
 
-    var movieName = "";
-    var slice = "";
+    // var movieName = "";
+    // var slice = "";
     //        slice = "Mr.Nobody";
     //        console.log(slice);
     // if (userInput = "") {
     //     slice= "Mr.Nobody"; // find a way to get mr Nobody in.
     // }
 
-    for (var i = 3; i < userInput.length; i++) {
 
-        movieName = movieName + "+" + userInput[i];
 
-    }
-
-    slice = movieName.slice(1);
-
-    var movieLink = "http://www.omdbapi.com/?t=" + slice + "&plot=shaort&apikey=trilogy";
+    var movieLink = "http://www.omdbapi.com/?t=" + getUserInput(userInput) + "&plot=shaort&apikey=trilogy";
     request(movieLink, function (error, response, body) {
         if (!error && response.statusCode === 200) {
+            var jsonBody = JSON.parse(body);
+            console.log("n/Title: " + jsonBody.Title + "n/Year: " + jsonBody.Year + "n/IMDB Rating: " + jsonBody.imdbRating
+                + "n/Rotten Tomatoes Rating: " + jsonBody.Ratings.Value + "n/Country Movie was Produced: " + jsonBody.Country +
+                "n/Language: " + jsonBody.Language + "n/Plot: " + jsonBody.Plot + "n/Actors: " + jsonBody.Actors);
 
-            console.log("Title: " + JSON.parse(body).Title);
-            console.log("Year: " + JSON.parse(body).Year);
-            console.log("IMDB Rating: " + JSON.parse(body).imdbRating);
-            console.log("Rotten Tomatoes Rating: " + JSON.parse(body).Ratings.Value);
-            console.log("Country Movie was Produced: " + JSON.parse(body).Country);
-            console.log("Language: " + JSON.parse(body).Language);
-            console.log("Plot: " + JSON.parse(body).Plot);
-            console.log("Actors: " + JSON.parse(body).Actors);
         }
     });
 
@@ -62,18 +65,14 @@ if (inputSelection === "movie-this") { // imdb
 
 } else if (inputSelection === "spotify-this-song") { // spotify
 
-    spotify.search({type:"track", query: "All the Small Things", limit: 3}, function(error,data){
-        if(error){
-            return console.log("Error occured: "+error);
+    spotify.search({ type: "track", query: getUserInput(userInput) }, function (error, data) {
+        if (error) {
+            return console.log("Error occured: " + error);
         }
-
-        console.log("Artist"+data.tracks.items);
-        console.log("Song name"+data.tracks.items);
-        console.log("Link to song preview"+data.tracks.items);
-        console.log("Album"+data.tracks.items);
-
-
+        var spotifyInfo = data.tracks.items;
+        console.log("\nArtist: " + spotifyInfo[0].artists[0].name + "\nSong Title: " + spotifyInfo[0].name
+            + "\nAlbum Name: " + spotifyInfo[0].album.name + "\nURL Preview: " + spotifyInfo[0].preview_url);
 
     });
- 
+
 }

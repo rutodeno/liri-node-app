@@ -67,7 +67,13 @@ if (inputSelection === "movie-this") { // imdb
             return console.log("Error occured: "+error);
         }
 
-        console.log(data);
+        console.log("Artist"+data.tracks.items);
+        console.log("Song name"+data.tracks.items);
+        console.log("Link to song preview"+data.tracks.items);
+        console.log("Album"+data.tracks.items);
+
+
+
     });
  
 }

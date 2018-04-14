@@ -1,7 +1,11 @@
 var dotEnv = require("dotenv").config();
 var keys = require("./keys.js");
-//var spotify = new spotify(keys.spotify);
 
+//spotify
+var Spotify = require("node-spotify-api");
+var spotify = new Spotify(keys.spotify);
+
+// twitter
 var Twitter = require("twitter");
 var client = new Twitter(keys.twitter);
 
@@ -11,7 +15,7 @@ var userInput = process.argv; // all our inputs
 var inputSelection = process.argv[2];
 var request = require("request");
 
-if (inputSelection === "movie-this") {
+if (inputSelection === "movie-this") { // imdb
 
     var movieName = "";
     var slice = "";
@@ -44,7 +48,7 @@ if (inputSelection === "movie-this") {
         }
     });
 
-} else if (inputSelection === "my-tweets") {
+} else if (inputSelection === "my-tweets") { // tweeter
 
     var params ={screen_name: "nodejs"};
     client.get("statuses/user_timeline",params, function(error, tweets,response){
@@ -56,6 +60,14 @@ if (inputSelection === "movie-this") {
     });
 
 
-} else if (inputSelection === "spotify-this-song") {
+} else if (inputSelection === "spotify-this-song") { // spotify
 
+    spotify.search({type:"track", query: "All the Small Things", limit: 3}, function(error,data){
+        if(error){
+            return console.log("Error occured: "+error);
+        }
+
+        console.log(data);
+    });
+ 
 }

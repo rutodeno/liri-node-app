@@ -1,19 +1,27 @@
 var dotEnv = require("dotenv").config();
 var keys = require("./keys.js");
+var Spotify = require("node-spotify-api");
+var Twitter = require("twitter");
+var request = require("request");
+var fs = require("fs");
+
+
+
+
 
 //spotify
-var Spotify = require("node-spotify-api");
 var spotify = new Spotify(keys.spotify);
 
 // twitter
-var Twitter = require("twitter");
 var client = new Twitter(keys.twitter);
 
 
 // omdb 
 var userInput = process.argv; // all our inputs
 var inputSelection = process.argv[2];
-var request = require("request");
+
+// reading from file
+
 
 
 function getUserInput(userInput) {
@@ -28,33 +36,33 @@ function getUserInput(userInput) {
 };
 
 
+var movieInput = "";
+var movieName = "";
+var songName = "";
+
 if (inputSelection === "movie-this") { // imdb
 
-    // var movieName = "";
-    // var slice = "";
-    //        slice = "Mr.Nobody";
-    //        console.log(slice);
-    // if (userInput = "") {
-    //     slice= "Mr.Nobody"; // find a way to get mr Nobody in.
-    // }
+    if (!movieInput) { // checking is the movie input is blank
+        movieName = "Mr.Nobody";
+    } else {
+        movieName = getUserInput(userInput);
+    }
 
-
-
-    var movieLink = "http://www.omdbapi.com/?t=" + getUserInput(userInput) + "&plot=shaort&apikey=trilogy";
+    var movieLink = "http://www.omdbapi.com/?t=" + movieName + "&plot=shaort&apikey=trilogy";
     request(movieLink, function (error, response, body) {
         if (!error && response.statusCode === 200) {
             var jsonBody = JSON.parse(body);
-            console.log("n/Title: " + jsonBody.Title + "n/Year: " + jsonBody.Year + "n/IMDB Rating: " + jsonBody.imdbRating
-                + "n/Rotten Tomatoes Rating: " + jsonBody.Ratings.Value + "n/Country Movie was Produced: " + jsonBody.Country +
-                "n/Language: " + jsonBody.Language + "n/Plot: " + jsonBody.Plot + "n/Actors: " + jsonBody.Actors);
+            console.log("\nTitle: " + jsonBody.Title + "\nYear: " + jsonBody.Year + "\nIMDB Rating: " + jsonBody.imdbRating
+                + "\nRotten Tomatoes Rating: " + jsonBody.Ratings.Value + "\nCountry Movie was Produced: " + jsonBody.Country +
+                "\nLanguage: " + jsonBody.Language + "\nPlot: " + jsonBody.Plot + "\nActors: " + jsonBody.Actors);
 
         }
     });
 
 } else if (inputSelection === "my-tweets") { // tweeter
 
-    var params ={screen_name: "nodejs"};
-    client.get("statuses/user_timeline",params, function(error, tweets,response){
+    var params = { screen_name: "nodejs" };
+    client.get("statuses/user_timeline", params, function (error, tweets, response) {
         if (!error) {
             for (var i = 0; i < tweets.length; i++) {
                 console.log("Tweets: " + tweets[i].text + " Time Created: " + tweets[i].created_at);
@@ -64,7 +72,28 @@ if (inputSelection === "movie-this") { // imdb
 
 
 } else if (inputSelection === "spotify-this-song") { // spotify
+   
+    spotifyThis(userInput);
+    
+    
+} else if (inputSelection === "do-what-it-says") {
+    fs.readFile("random.txt", "utf8", function (err, result) {
+        if (err)
+            console.log(err)
 
+        spotifyThis(result);
+
+    });
+
+} else {
+
+    console.log(inputSelection + ": is not one of the commands. Please enter an appropriate command. You can choose from the following: "
+        + "\nmovie-this \nmy-tweets \nspotify-this-song \ndo-what-it-says ");
+}
+
+
+// spotify function
+function spotifyThis(userInput) {
     spotify.search({ type: "track", query: getUserInput(userInput) }, function (error, data) {
         if (error) {
             return console.log("Error occured: " + error);

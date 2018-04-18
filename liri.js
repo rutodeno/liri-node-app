@@ -46,7 +46,7 @@ if (inputSelection === "movie-this") { // imdb
 
 } else if (inputSelection === "my-tweets") { // tweeter
 
-    var params = { screen_name: "nodejs" };
+    var params = { screen_name: "rutodeno" };
     client.get("statuses/user_timeline", params, function (error, tweets, response) {
         if (!error) {
             for (var i = 0; i < tweets.length; i++) {

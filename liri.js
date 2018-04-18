@@ -20,25 +20,10 @@ var client = new Twitter(keys.twitter);
 var userInput = process.argv; // all our inputs
 var inputSelection = process.argv[2];
 
-// reading from file
 
-
-
-function getUserInput(userInput) {
-
-    var searchName = '';
-    for (var i = 3; i < userInput.length; i++) {
-
-        searchName = searchName + "+" + userInput[i];
-
-    }
-    return searchName.slice(1);
-};
-
-
-var movieInput = "";
-var movieName = "";
-var songName = "";
+var movieInput = ""; // holds movie input
+var movieName = "";  // will hold default movie name
+var songName = ""; // will also hold default song name
 
 if (inputSelection === "movie-this") { // imdb
 
@@ -72,10 +57,17 @@ if (inputSelection === "movie-this") { // imdb
 
 
 } else if (inputSelection === "spotify-this-song") { // spotify
-   
-    spotifyThis(userInput);
-    
-    
+
+    songName = getUserInput(userInput);
+
+    if (!songName) {
+        songName = "The Sign";
+        spotifyThis(songName);
+    } else {
+        spotifyThis(songName);
+    }
+
+
 } else if (inputSelection === "do-what-it-says") {
     fs.readFile("random.txt", "utf8", function (err, result) {
         if (err)
@@ -91,16 +83,44 @@ if (inputSelection === "movie-this") { // imdb
         + "\nmovie-this \nmy-tweets \nspotify-this-song \ndo-what-it-says ");
 }
 
+// concatenate string with "+"
+function getUserInput(userInput) {
+
+    var searchName = '';
+    for (var i = 3; i < userInput.length; i++) {
+
+        searchName = searchName + "+" + userInput[i];
+
+    }
+    return searchName.slice(1);
+};
 
 // spotify function
-function spotifyThis(userInput) {
-    spotify.search({ type: "track", query: getUserInput(userInput) }, function (error, data) {
+function spotifyThis(songInput) {
+    spotify.search({ type: "track", query: songInput }, function (error, data) {
         if (error) {
             return console.log("Error occured: " + error);
         }
         var spotifyInfo = data.tracks.items;
-        console.log("\nArtist: " + spotifyInfo[0].artists[0].name + "\nSong Title: " + spotifyInfo[0].name
-            + "\nAlbum Name: " + spotifyInfo[0].album.name + "\nURL Preview: " + spotifyInfo[0].preview_url);
+
+
+        for (var i = 0; i < spotifyInfo.length; i++) { // trying to match the name with the song.
+            if (spotifyInfo[i].name === songInput) {
+                spotify.request("https://api.spotify.com/v1/tracks/" + spotifyInfo[i].id)
+                    .then(function (data) {
+                        console.log("\nArtist: " + data.album.artists[0].name + "\nSong Name: " + data.album.name + "\nPreview of link: " + data.preview_url + "\nAlbum: " + data.name);
+                    })
+                    .catch(function (err) {
+                        console.log("Error: " + err);
+                    });
+            } else {
+
+                console.log("\nArtist: " + spotifyInfo[0].artists[0].name + "\nSong Title: " + spotifyInfo[0].name
+                    + "\nAlbum Name: " + spotifyInfo[0].album.name + "\nURL Preview: " + spotifyInfo[0].preview_url);
+                break;
+
+            }
+        }
 
     });
 
